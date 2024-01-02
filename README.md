@@ -5,6 +5,8 @@ Sketch can be easy adapted to similar protocols.
 Tested on NodeMcu ESP8266 board with cheap XY-MK-5V super regenerative receiver.
 Output to serial monitor.
 
+![Output Serial Monitor](Images/serial_monitor_nexus_decoder.png)
+
 Example of brands that uses Nexus-TH protocol: Alecto (WS-1050), FreeTec (NC-7345, NX-3980), Technoline, Solight (TE82S), TFA (30.3209).
 
 Most of these outdoor sensors have no logging for long periods.
