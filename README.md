@@ -2,7 +2,7 @@
 
 Simple arduino sketch to decode 433 signals from a Nexus-TH outdoor sensor. 
 Nexus-TH is a modulation protocol for temperature/humidity sensors. 
-Sketch can be easy adapted to similar protocols. 
+Sketch can be easily adapted to similar protocols. 
 
 The sketch uses no libraries. The 433 receiver is connected to datapin D2 of NodeMcu. Modulation protocol: OOK_PULSE_PPM.
 
