@@ -1,4 +1,4 @@
-# Arduino-433-MHz-decoder-for-Nexus-TH-outdoor-temperature-sensor
+# Arduino 433MHz decoder for Nexus outdoor sensor
 
 Simple arduino sketch to decode 433 signals from a Nexus-TH outdoor sensor. 
 Nexus-TH is a modulation protocol for temperature/humidity sensors. 
