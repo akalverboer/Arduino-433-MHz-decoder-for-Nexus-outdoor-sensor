@@ -2,7 +2,11 @@
 Simple arduino sketch to decode 433 signal from Nexus-TH outdoor temperature/humidity sensor.
 No libraries needed. Receiver on datapin D2 of NodeMcu. Modulation protocol: OOK_PULSE_PPM.
 Sketch can be easy adapted to similar protocols.
+
 Tested on NodeMcu ESP8266 board with cheap XY-MK-5V super regenerative receiver.
+
+![Receiver](Images/433_receiver_XY-MK-5V.jpg)
+
 Output to serial monitor.
 
 ![Output Serial Monitor](Images/serial_monitor_nexus_decoder.png)
