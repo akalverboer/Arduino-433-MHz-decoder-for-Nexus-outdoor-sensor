@@ -18,4 +18,5 @@ Output to serial monitor.
 Example of brands that uses Nexus-TH protocol: Alecto (WS-1050), FreeTec (NC-7345, NX-3980), Technoline, Solight (TE82S), TFA (30.3209).
 
 Most of these outdoor sensors have no logging for long periods.
+
 I used this sketch to log the outdoor temperature of my Alecto WS-1050.
