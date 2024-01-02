@@ -1,5 +1,6 @@
 # Arduino-433-MHz-decoder-for-Nexus-TH-outdoor-temperature-sensor
 Simple arduino sketch to decode 433 signal from Nexus-TH outdoor temperature/humidity sensor.
+
 No libraries needed. Receiver on datapin D2 of NodeMcu. Modulation protocol: OOK_PULSE_PPM.
 
 ![OOK_PULSE_PPM Modulation](Images/nexus_protocol.png)
