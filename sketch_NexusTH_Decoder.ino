@@ -3,8 +3,7 @@
  * Program to receive packets from a wireless sensor with Nexus_TH modulation protocol. 
  * Receiver on datapin D2 of NodeMcu. Modulation protocol: OOK_PULSE_PPM. 
  * Tested on NodeMcu ESP8266 board with cheap XY-MK-5V super regenerative receiver.
- * Written by : Arthur Kalverboer, 30-12-2023
- * https://github.com/akalverboer/
+ * Checksum is sensor dependant!! For DEVICE_ID 35 the checksum is 124.
  *=========================================================================================
 Protocol Nexus_TH
 The sensor sends a packet of 36 bits 12 times.
@@ -28,10 +27,15 @@ Channel: 00
 Temperature: 000001001001 = 7.3  (73/10) Celsius
 Humidity: 00010101 = 21  Percentage
 
-NB. As far as I understand.
+1. As far as I understand.
 The width of the last gap is undefined because there is not a desync pulse.
 So I can not know if bit 36 (the last) is HIGH or LOW. Therefore I choose one: HIGH.
 This gives at most a minor error in the humidity value.
+2. Error detection method: checksum
+Some parts of a packet are constant. For these parts we define a checksum to eliminate errors.
+The checksum is defined by the sum of the positions of bits 1 (array checksumBits).
+The correct value for the checksum is dependant of the DEVICE_ID of the sensor (bits 0..7)
+
 ===========================================================================================
 */
 
@@ -73,6 +77,7 @@ struct INT_VARS {
   bool isRising;
   unsigned int bitCount;
   bool syncPassed;
+  uint8_t checksum;
 };  // semicolon!!
 
 #define ledPin      LED_BUILTIN  // On board LED 
@@ -84,6 +89,7 @@ const int  DATAPIN = D2;  // NodeMCU pin D2 (GPIO3): receiver signal
 
 // Globals
 volatile byte packetBits[BUFFER_SIZE];  // Store bits of packets
+volatile byte checksumBits[BUFFER_SIZE] = {1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0};
 volatile bool packetReceived = false;   // If true, packet ready for processing
 volatile INT_VARS ix;       // Local vars of interrupt handler
 NearestNumber nn;  
@@ -97,6 +103,7 @@ void initHandler() {
   ix.isRising = false;   // Datapin has received rising value
   ix.bitCount = 0;       // Current number of bits in packet
   ix.syncPassed = false;   // True if sync pulse is detected
+  ix.checksum = 0;
   for (uint8_t j = 0; j < BUFFER_SIZE; j=j+1) {
     packetBits[j] = 0;
   }
@@ -207,34 +214,47 @@ void ICACHE_RAM_ATTR handler() {
     // Sync gap detected. Wait for next packet interrupts.
     ix.syncPassed = true; 
     ix.bitCount = 0;
-    }
+    ix.checksum = 0;
+  }
   else if ((ix.isRising == false) && (ix.durCat == 500)) {
     // Pulse detected. Wait for next interrupt. Do nothing.
-    }
+  }
   else if ( (ix.syncPassed == true) && (ix.isRising == true) && ( (ix.durCat == 1000)  || (ix.durCat == 2000) ) ) {
     // Bit 0 or bit 1 gap detected. Store new bit in array buffer.
     ix.bitCount ++;
     if (ix.durCat == 1000) { packetBits[ix.bitCount-1] = BIN0; };
-    if (ix.durCat == 2000) { packetBits[ix.bitCount-1] = BIN1; };
+    if (ix.durCat == 2000) {
+      packetBits[ix.bitCount-1] = BIN1;
+      ix.checksum += checksumBits[ix.bitCount-1] * ix.bitCount;
+    };
  
     if (ix.bitCount == 35) {
       // The width of the last gap is undefined because there is not a desync pulse.
       // So we can not know if bit 36 (the last) is HIGH or LOW. Therefore we choose one: HIGH.
       ix.bitCount ++;
       packetBits[ix.bitCount-1] = BIN1;
-      ix.syncPassed = false; 
-      packetReceived = true;       // Packet ready. Packet can be processed by loop()
-    }}
+    }
+
+    if (ix.bitCount == 36) {
+      // Sensor dependant checksum !!
+      if (ix.checksum == 124) {
+        ix.syncPassed = false; 
+        packetReceived = true;   // Packet ready. Packet can be processed by loop()
+      }
+      else {
+        // Invalid checksum. Skip packet reading and wait for new packet.
+        ix.syncPassed = false;
+      }
+    }
+  }
   else if ( (ix.durCat == nn.getNumLow()) || (ix.durCat == nn.getNumHigh()) ) {
     // Undefined pulse or gap width. Skip packet reading and wait for new packet.
     ix.syncPassed = false;
-    ix.bitCount = 0;
-    }
+  }
   else {
     // Undefined condition. E.g: small gap of 500 us
     // Skip packet reading and wait for new packet.
     ix.syncPassed = false; 
-    ix.bitCount = 0;
   }
   return;
 } // handler()
