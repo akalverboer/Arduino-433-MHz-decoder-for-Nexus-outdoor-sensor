@@ -27,11 +27,7 @@ Channel: 00
 Temperature: 000001001001 = 7.3  (73/10) Celsius
 Humidity: 00010101 = 21  Percentage
 
-1. As far as I understand.
-The width of the last gap is undefined because there is not a desync pulse.
-So I can not know if bit 36 (the last) is HIGH or LOW. Therefore I choose one: HIGH.
-This gives at most a minor error in the humidity value.
-2. Error detection method: checksum
+Error detection method: checksum
 Some parts of a packet are constant. For these parts we define a checksum to eliminate errors.
 The checksum is defined by the sum of the positions of bits 1 (array checksumBits).
 The correct value for the checksum is dependant of the DEVICE_ID of the sensor (bits 0..7)
@@ -230,9 +226,9 @@ void ICACHE_RAM_ATTR handler() {
  
     if (ix.bitCount == 35) {
       // The width of the last gap is undefined because there is not a desync pulse.
-      // So we can not know if bit 36 (the last) is HIGH or LOW. Therefore we choose one: HIGH.
+      // So we can not know if bit 36 (the last) is HIGH or LOW. Therefore we choose one: LOW.
       ix.bitCount ++;
-      packetBits[ix.bitCount-1] = BIN1;
+      packetBits[ix.bitCount-1] = BIN0;
     }
 
     if (ix.bitCount == 36) {
