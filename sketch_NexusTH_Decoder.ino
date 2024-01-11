@@ -156,7 +156,7 @@ String getBatteryStatus() {
 
 String getChannel() {
   // Get channel from received packetBits and return it.
-  String channel = String(packetBits[11]) + String(packetBits[12]);
+  String channel = String(packetBits[10]) + String(packetBits[11]);
   return channel;
 } // getChannel()
 
